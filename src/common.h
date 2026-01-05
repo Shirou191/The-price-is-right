@@ -7,17 +7,27 @@
 enum {
     PT_LOGIN = 1,
     PT_LOGIN_RESP = 2,
-    PT_GAME_MSG = 3,        // Thông báo chung
-    PT_GAME_QUESTION = 4,   // Tên sản phẩm & bắt đầu vòng
-    PT_GAME_BID = 5,        // Client gửi giá
-    PT_GAME_RESULT = 6,     // Kết quả vòng chơi
-    PT_GAME_LEADERBOARD = 7,// Bảng xếp hạng
-    PT_IMAGE_START = 8,     // Bắt đầu gửi ảnh (Header: Tên file, Kích thước)
-    PT_IMAGE_DATA = 9,      // Dữ liệu ảnh
-    PT_GAME_END = 10        // Kết thúc game
+    PT_REGISTER = 3,         // NEW: Register
+    PT_GAME_MSG = 4,
+    PT_GAME_QUESTION = 5,
+    PT_GAME_BID = 6,
+    PT_GAME_RESULT = 7,
+    PT_GAME_LEADERBOARD = 8,
+    PT_IMAGE_START = 9,
+    PT_IMAGE_DATA = 10,
+    PT_GAME_END = 11,
+    
+    // Room / Lobby
+    PT_LOBBY_UPDATE = 12,    // Server sends room list
+    PT_CREATE_ROOM = 13,     // Client creates room
+    PT_JOIN_ROOM = 14,       // Client joins room
+    PT_LEAVE_ROOM = 15,      // Client leaves room
+    PT_INVITE = 16,          // Invite player
+    PT_INVITE_RESP = 17,      // Respond to invite
+    PT_GAME_STATS = 18        // Update Score/Round
 };
 
-// Cấu trúc sản phẩm
+// Product Structure
 typedef struct {
     char name[100];
     int price;

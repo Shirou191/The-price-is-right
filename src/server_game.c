@@ -49,6 +49,7 @@ typedef struct {
     int max_rounds;
     int product_idx;     // Current product index
     struct timeval round_start_time;
+    int owner_idx;       // Index of the owner in players array
 } Room;
 
 // --- GLOBALS ---
@@ -146,6 +147,24 @@ void broadcast_lobby_state() {
         }
     }
     broadcast_room(0, PT_LOBBY_UPDATE, buf);
+}
+
+// Broadcast list of all online players to everyone (for invite UI)
+void broadcast_player_list() {
+    char buf[4096] = "";
+    for(int i=0; i<MAX_CLIENTS; i++) {
+        if(players[i].socket_fd > 0 && players[i].is_logged_in) {
+            char item[64];
+            snprintf(item, sizeof(item), "%s:%d;", players[i].username, players[i].room_id);
+            strcat(buf, item);
+        }
+    }
+    // Send to all logged in
+    for(int i=0; i<MAX_CLIENTS; i++) {
+        if(players[i].socket_fd > 0 && players[i].is_logged_in) {
+            send_packet(players[i].socket_fd, PT_PLAYER_LIST, buf, strlen(buf));
+        }
+    }
 }
 
 // --- GAME LOGIC ---
@@ -400,6 +419,7 @@ void handle_client_msg(int idx) {
                 players[idx].room_id = 0; // Lobby
                 send_packet(sock, PT_LOGIN_RESP, "OK", 2);
                 broadcast_lobby_state(); // Send room list to newly logged in user
+                broadcast_player_list(); /* NEW */
                 break;
             }
         }
@@ -442,33 +462,40 @@ void handle_client_msg(int idx) {
             rooms[r_id].max_rounds = 5;
             rooms[r_id].state = 0; // Waiting
             
+            rooms[r_id].owner_idx = idx; // Assign Owner
+            
             players[idx].room_id = r_id;
             
             broadcast_lobby_state(); // Notify others
-            char msg[32]; snprintf(msg, sizeof(msg), "Room %d Created", r_id);
+            char msg[64]; snprintf(msg, sizeof(msg), "Room %d Created (You are Owner)", r_id);
             send_packet(sock, PT_GAME_MSG, msg, strlen(msg));
         }
     }
     else if (type == PT_JOIN_ROOM) {
          int target_id = atoi(buf);
          if(target_id > 0 && target_id < MAX_ROOMS && rooms[target_id].active) {
-             if(rooms[target_id].player_count < MAX_PLAYERS_PER_ROOM && rooms[target_id].state == 0) {
-                 players[idx].room_id = target_id;
-                 rooms[target_id].player_count++;
-                 
-                 char msg[64];
-                 snprintf(msg, sizeof(msg), "%s joined room.", players[idx].username);
-                 broadcast_room(target_id, PT_GAME_MSG, msg);
-                 broadcast_lobby_state();
-                 
-                 // Auto Start if 2 players (Demo)
-                 if(rooms[target_id].player_count >= 2) {
-                     rooms[target_id].state = 1;
-                     broadcast_lobby_state(); 
-                     start_round(target_id);
-                 }
-             }
-         }
+             if (rooms[target_id].state == 0 && rooms[target_id].player_count < MAX_PLAYERS_PER_ROOM) {
+                players[idx].room_id = target_id;
+                rooms[target_id].player_count++;
+                
+                broadcast_lobby_state();
+                broadcast_player_list(); /* NEW */
+                
+                char msg[64]; snprintf(msg, sizeof(msg), "%s joined Room %d", players[idx].username, target_id);
+                broadcast_room(target_id, PT_GAME_MSG, msg);
+            } else {        }
+        }
+    }
+    else if (type == PT_START_GAME) {
+        int r_id = players[idx].room_id;
+        if(r_id > 0 && rooms[r_id].active && rooms[r_id].owner_idx == idx) {
+            if(rooms[r_id].state == 0) {
+                rooms[r_id].state = 1; // Playing
+                broadcast_room(r_id, PT_GAME_MSG, "Owner started the game!");
+                start_round(r_id);
+                broadcast_lobby_state();
+            }
+        }
     }
     else if (type == PT_LEAVE_ROOM) {
         int r = players[idx].room_id;
@@ -478,6 +505,7 @@ void handle_client_msg(int idx) {
             players[idx].score = 0;
             if(rooms[r].player_count == 0) rooms[r].active = 0;
             broadcast_lobby_state();
+            broadcast_player_list(); /* NEW */
             send_packet(sock, PT_GAME_MSG, "Left Room", 9);
         }
     }
@@ -486,7 +514,71 @@ void handle_client_msg(int idx) {
         if(players[idx].room_id > 0) {
             players[idx].current_bid = bid;
             gettimeofday(&players[idx].bid_time, NULL);
+            
+            // Broadcast Bid
+            char msg[64];
+            snprintf(msg, sizeof(msg), "%s bid: %d", players[idx].username, bid);
+            broadcast_room(players[idx].room_id, PT_GAME_MSG, msg);
+            
             check_round_logic(players[idx].room_id);
+        }
+    }
+    else if (type == PT_INVITE) {
+        // buf = "TargetUsername"
+        int target_idx = -1;
+        for(int i=0; i<MAX_CLIENTS; i++) {
+            if(strcmp(players[i].username, buf) == 0 && players[i].socket_fd > 0) {
+                target_idx = i;
+                break;
+            }
+        }
+        
+        if (target_idx != -1) {
+            if (players[target_idx].room_id == 0) {
+                // Forward Invite: "RoomID:SenderName"
+                char invite_msg[128];
+                snprintf(invite_msg, sizeof(invite_msg), "%d:%s", players[idx].room_id, players[idx].username);
+                send_packet(players[target_idx].socket_fd, PT_INVITE, invite_msg, strlen(invite_msg));
+                send_packet(sock, PT_GAME_MSG, "Invite sent.", 12);
+            } else {
+                send_packet(sock, PT_GAME_MSG, "User is busy (in a game).", 25);
+            }
+        } else {
+            send_packet(sock, PT_GAME_MSG, "User not found.", 15);
+        }
+    }
+    else if (type == PT_INVITE_RESP) {
+        // buf = "SenderName:DECISION"
+        char *sender_name = strtok(buf, ":");
+        char *decision = strtok(NULL, ":");
+        
+        int sender_idx = -1;
+        for(int i=0; i<MAX_CLIENTS; i++) {
+            if(strcmp(players[i].username, sender_name) == 0) {
+                sender_idx = i;
+                break;
+            }
+        }
+        
+        if (sender_idx != -1 && decision) {
+            if (strcmp(decision, "ACCEPT") == 0) {
+                int r_id = players[sender_idx].room_id;
+                // Move player (Logic copied from JOIN_ROOM)
+                if(r_id > 0 && rooms[r_id].active && rooms[r_id].player_count < MAX_PLAYERS_PER_ROOM && rooms[r_id].state == 0) {
+                    players[idx].room_id = r_id;
+                    rooms[r_id].player_count++;
+                    
+                    broadcast_lobby_state();
+                    broadcast_player_list(); // NEW: Update player list on invite accept
+                    
+                    char msg[64]; snprintf(msg, sizeof(msg), "%s joined via invite", players[idx].username);
+                    broadcast_room(r_id, PT_GAME_MSG, msg);
+                } else {
+                   send_packet(sock, PT_GAME_MSG, "Room full or started.", 21);
+                }
+            } else {
+                send_packet(players[sender_idx].socket_fd, PT_GAME_MSG, "User declined invite.", 21);
+            }
         }
     }
 

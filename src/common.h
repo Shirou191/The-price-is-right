@@ -24,7 +24,9 @@ enum {
     PT_LEAVE_ROOM = 15,      // Client leaves room
     PT_INVITE = 16,          // Invite player
     PT_INVITE_RESP = 17,      // Respond to invite
-    PT_GAME_STATS = 18        // Update Score/Round
+    PT_GAME_STATS = 18,       // Update Score/Round
+    PT_START_GAME = 19,       // Owner starts game
+    PT_PLAYER_LIST = 20       // List of online players
 };
 
 // Product Structure

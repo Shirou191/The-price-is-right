@@ -1,0 +1,35 @@
+--- Start Log ---
+chip joined via invite
+Owner started the game!
+Round 1/5: Honda_Vision_2024
+<<<STATS:1:5:0>>>
+<<<IMG:recv_vision.jpg>>>
+<<<BID:786>>>
+chip bid: 786
+huy bid: 545
+quan bid: 543
+Price: 32000. Winner: chip (+233 pts)!
+LEADERBOARD:
+quan: 207
+huy: 215
+chip: 233
+
+<<<STATS:1:5:233>>>
+Round 2/5: Laptop_Dell_XPS
+<<<STATS:2:5:233>>>
+<<<IMG:recv_dell.jpg>>>
+<<<BID:9765>>>
+chip bid: 9765
+huy bid: 3245
+quan bid: 7645
+Price: 45000. Winner: chip (+427 pts)!
+LEADERBOARD:
+quan: 575
+huy: 492
+chip: 660
+
+<<<STATS:2:5:660>>>
+Round 3/5: My_Tom_Hao_Hao
+<<<STATS:3:5:660>>>
+<<<IMG:recv_hao_hao.jpg>>>
+--- End Log ---

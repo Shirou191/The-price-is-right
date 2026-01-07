@@ -1,0 +1,3 @@
+--- Start Log ---
+chip joined Room 1
+--- End Log ---

@@ -1,0 +1,45 @@
+--- Start Log ---
+Room 1 Created (You are Owner)
+Invite sent.
+quan joined via invite
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+<<<BID:56780>>>
+huy bid: 56780
+quan bid: 5678
+Price: 30000. Winner: quan (+346 pts)!
+LEADERBOARD:
+quan: 346
+huy: 0
+
+<<<STATS:1:5:0>>>
+Round 2/5: Honda_Vision_2024
+<<<STATS:2:5:0>>>
+<<<IMG:recv_vision.jpg>>>
+<<<BID:9878>>>
+huy bid: 9878
+quan bid: 3688
+Price: 32000. Winner: huy (+516 pts)!
+LEADERBOARD:
+quan: 657
+huy: 516
+
+<<<STATS:2:5:516>>>
+Round 3/5: Laptop_Dell_XPS
+<<<STATS:3:5:516>>>
+<<<IMG:recv_dell.jpg>>>
+<<<BID:46687>>>
+huy bid: 46687
+quan bid: 46878
+Price: 45000. No winners (all overbid).
+LEADERBOARD:
+quan: 657
+huy: 516
+
+<<<STATS:3:5:516>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<STATS:4:5:516>>>
+<<<IMG:recv_hao_hao.jpg>>>
+--- End Log ---

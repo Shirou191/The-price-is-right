@@ -328,10 +328,30 @@ void check_round_logic(int r_idx) {
                 int total = (int)(base_score + time_bonus);
                 players[i].score += total;
                 
+                // Send Private Breakdown
+                char p_msg[128];
+                snprintf(p_msg, sizeof(p_msg), "You earned %d pts (Accuracy: %d, Time Bonus: %d)", total, (int)base_score, (int)time_bonus);
+                send_packet(players[i].socket_fd, PT_GAME_MSG, p_msg, strlen(p_msg));
+                
+                // Broadcast Public Detailed Score to OTHERS only
+                char pub_msg[128];
+                snprintf(pub_msg, sizeof(pub_msg), "%s earned %d pts (Accuracy: %d, Time Bonus: %d)", players[i].username, total, (int)base_score, (int)time_bonus);
+                
+                for(int j=0; j<MAX_CLIENTS; j++) {
+                    if(players[j].socket_fd > 0 && players[j].room_id == r_idx && j != i) {
+                        send_packet(players[j].socket_fd, PT_GAME_MSG, pub_msg, strlen(pub_msg));
+                    }
+                }
+                
                 if(total > max_round_score) {
                     max_round_score = total;
                     winner_idx = i;
                 }
+            } else {
+                // Overbid message
+                char p_msg[64];
+                snprintf(p_msg, sizeof(p_msg), "You overbid! (Price: %d)", price);
+                send_packet(players[i].socket_fd, PT_GAME_MSG, p_msg, strlen(p_msg));
             }
         }
     }
@@ -467,6 +487,7 @@ void handle_client_msg(int idx) {
             players[idx].room_id = r_id;
             
             broadcast_lobby_state(); // Notify others
+            broadcast_player_list(); /* NEW: Update player list status for creator */
             char msg[64]; snprintf(msg, sizeof(msg), "Room %d Created (You are Owner)", r_id);
             send_packet(sock, PT_GAME_MSG, msg, strlen(msg));
         }

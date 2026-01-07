@@ -26,6 +26,7 @@ GtkWidget *lbl_lobby_user; /* NEW */
 GtkWidget *btn_create;
 GtkWidget *btn_join;
 GtkWidget *btn_replay; /* NEW */
+GtkWidget *lbl_empty_rooms; /* NEW: Empty State */
 
 // Screen 3: Game Dashboard
 GtkWidget *lbl_score;
@@ -52,6 +53,10 @@ int is_owner = 0; /* NEW */
 FILE *replay_log = NULL; /* NEW */
 GList *replay_lines = NULL; /* NEW: Replay buffer */
 guint replay_timer_id = 0; /* NEW: Replay timer */
+// Timer
+GtkWidget *lbl_timer; /* NEW */
+guint round_timer_id = 0;
+int round_time_left = 30;
 
 // --- NETWORK HELPERS ---
 void send_packet(int type, const char *payload) {
@@ -105,6 +110,69 @@ void update_lobby_list(char *data) {
         }
         token = strtok(NULL, ";");
     }
+    
+    // Check Empty State
+    if(gtk_tree_model_iter_n_children(GTK_TREE_MODEL(store_rooms), NULL) == 0) {
+        gtk_widget_set_visible(lbl_empty_rooms, TRUE);
+    } else {
+        gtk_widget_set_visible(lbl_empty_rooms, FALSE);
+    }
+}
+
+// Timer Logic
+gboolean on_round_timer(gpointer data) {
+    round_time_left--;
+    char buf[32];
+    snprintf(buf, sizeof(buf), "Time: %ds", round_time_left);
+    gtk_label_set_text(GTK_LABEL(lbl_timer), buf);
+    
+    if (round_time_left <= 0) {
+        round_timer_id = 0;
+        return FALSE; // Stop
+    }
+    return TRUE;
+}
+
+void start_round_timer() {
+    if(round_timer_id > 0) g_source_remove(round_timer_id);
+    round_time_left = 30;
+    gtk_label_set_text(GTK_LABEL(lbl_timer), "Time: 30s");
+    round_timer_id = g_timeout_add(1000, on_round_timer, NULL);
+}
+
+void stop_round_timer() {
+    if(round_timer_id > 0) {
+        g_source_remove(round_timer_id);
+        round_timer_id = 0;
+    }
+    gtk_label_set_text(GTK_LABEL(lbl_timer), "Time: --");
+}
+
+// Toast Helper
+gboolean on_toast_timeout(gpointer data) {
+    gtk_widget_destroy(GTK_WIDGET(data));
+    return FALSE;
+}
+
+void show_toast(const char *msg) {
+    GtkWidget *win = gtk_window_new(GTK_WINDOW_POPUP);
+    GtkWidget *frame = gtk_frame_new(NULL);
+    gtk_style_context_add_class(gtk_widget_get_style_context(frame), "toast-box"); /* NEW */
+    gtk_container_add(GTK_CONTAINER(win), frame);
+    
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_container_set_border_width(GTK_CONTAINER(box), 20); // Padding
+    gtk_container_add(GTK_CONTAINER(frame), box);
+    
+    GtkWidget *lbl = gtk_label_new(msg);
+    gtk_box_pack_start(GTK_BOX(box), lbl, TRUE, TRUE, 0);
+    
+    gtk_window_set_transient_for(GTK_WINDOW(win), GTK_WINDOW(window));
+    gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER_ON_PARENT);
+    gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
+    
+    gtk_widget_show_all(win);
+    g_timeout_add(2000, on_toast_timeout, win);
 }
 
 gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer data) {
@@ -216,7 +284,10 @@ gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer dat
                                      GTK_BUTTONS_OK,
                                      "%s", buf);
             gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
+        } else if (strstr(buf, "You earned") || strstr(buf, "You overbid!")) {
+             show_toast(buf);
         }
         
         append_log(buf);
@@ -259,6 +330,10 @@ gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer dat
         if(fname && sz) {
             img_bytes_total = atol(sz);
             img_bytes_received = 0;
+            
+            // Start Timer on new round image
+            start_round_timer();
+            
             snprintf(current_img_name, sizeof(current_img_name), "recv_%s", fname);
             img_file = fopen(current_img_name, "wb");
         }
@@ -281,6 +356,7 @@ gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer dat
         }
     }
     else if (type == PT_GAME_RESULT) {
+        stop_round_timer();
         append_log(buf);
     }
     else if (type == PT_GAME_LEADERBOARD) {
@@ -392,6 +468,9 @@ gboolean replay_step(gpointer data) {
             gtk_label_set_text(GTK_LABEL(lbl_score), sc);
         }
     } else {
+        if(strstr(line, "You earned")) {
+            show_toast(line);
+        }
         append_log(line);
     }
     
@@ -505,14 +584,18 @@ void on_leave_click() {
 }
 
 void on_bid_click() {
-    const char *bid_val = gtk_entry_get_text(GTK_ENTRY(entry_bid));
-    
-    if(replay_log) {
-        fprintf(replay_log, "<<<BID:%s>>>\n", bid_val);
-        fflush(replay_log);
+    const char *bid_text = gtk_entry_get_text(GTK_ENTRY(entry_bid));
+    if(strlen(bid_text) > 0) {
+        send_packet(PT_GAME_BID, bid_text);
+        gtk_entry_set_text(GTK_ENTRY(entry_bid), "");
+        stop_round_timer(); /* Stop Timer on Bid */
+        
+        // Log Bid
+        if(replay_log) {
+            fprintf(replay_log, "<<<BID:%s>>>\n", bid_text);
+            fflush(replay_log);
+        }
     }
-    
-    send_packet(PT_GAME_BID, bid_val);
 }
 
 void on_start_click() {
@@ -589,39 +672,134 @@ void on_invite_click() {
 void load_css() {
     GtkCssProvider *provider = gtk_css_provider_new();
     const char *css_data =
-        // Global
-        "window { background-color: #f0f2f5; font-family: 'Segoe UI', 'Sans'; }"
-        "button { font-weight: bold; border-radius: 6px; }"
-        "entry { border-radius: 6px; padding: 8px; font-size: 14px; }"
+        // Refined Golden & Red Theme (Luxurious Game Show)
+        "headerbar { background-color: #D50000; border-bottom: 2px solid #FFD700; min-height: 48px; }"
+        "headerbar label { color: #FFD700; font-weight: 900; font-size: 20px; text-shadow: 1px 1px 2px #000; }"
         
-        // Login Screen
-        ".login-box { background-color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 60px 40px; padding: 40px; }"
-        ".login-title { font-size: 24px; font-weight: 800; color: #1a73e8; margin-bottom: 20px; }"
-        ".btn-action { background-image: none; background-color: #1a73e8; color: white; border: none; padding: 10px; margin-top: 5px; }"
-        ".btn-action:hover { background-color: #1557b0; box-shadow: 0 2px 5px rgba(26, 115, 232, 0.4); }"
+        "window { background-color: #2B0505; color: #FFF8E1; font-family: 'Segoe UI', 'Roboto', 'Sans'; }"
         
-        // Lobby Screen
-        ".lobby-box { padding: 20px; }"
-        ".lobby-title { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 5px; }"
+        // --- BUTTON HIERARCHY ---
+        // Base Button Reset
+        "button { background-image: none; border: none; border-radius: 20px; padding: 10px 20px; font-weight: 900; -gtk-icon-shadow: none; }"
+        "button:disabled { background-color: #3E2723; color: #6D4C41; box-shadow: none; }"
+
+        // Primary Action (Log In, Create Room, Place Bid) - Gradient Gold, Strong Shadow
+        ".btn-primary { "
+        "   background-image: linear-gradient(to bottom, #FFD700, #FFC107); "
+        "   color: #3E2723; "
+        "   border: 1px solid #FFEA00; "
+        "   box-shadow: 0 4px 6px rgba(0,0,0,0.4); "
+        "}"
+        ".btn-primary:hover { "
+        "   background-image: linear-gradient(to bottom, #FFEA00, #FFD54F); "
+        "   box-shadow: 0 6px 8px rgba(0,0,0,0.5); "
+        "}"
+        ".btn-primary:active { "
+        "   background-image: linear-gradient(to bottom, #FFC107, #FFB300); "
+        "   box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); "
+        "}"
         
-        ".room-list { background-color: white; border-radius: 8px; font-size: 14px; color: #2c3e50; }"
-        "treeview { background-color: white; color: #2c3e50; }"
-        "treeview:selected { background-color: #3498db; color: white; }"
+        // Secondary Action (Join Room, Reg) - Outlined Gold
+        ".btn-secondary { "
+        "   background-color: transparent; "
+        "   border: 2px solid #FFD700; "
+        "   color: #FFD700; "
+        "}"
+        ".btn-secondary:hover { "
+        "   background-color: rgba(255, 215, 0, 0.1); "
+        "}"
+        ".btn-secondary:active { "
+        "   background-color: rgba(255, 215, 0, 0.2); "
+        "}"
+
+        // Tertiary Action (Watch Replay) - Subtler Button
+        ".btn-tertiary { "
+        "   background-color: rgba(255, 215, 0, 0.1); "
+        "   color: #FFD700; "
+        "   border: 1px solid #FFD700; "
+        "   border-radius: 20px; "
+        "   padding: 8px 16px; "
+        "}"
+        ".btn-tertiary:hover { "
+        "   background-color: rgba(255, 215, 0, 0.2); "
+        "   color: #FFF; "
+        "   border-color: #FFF; "
+        "}"
+
+        // Destructive / Leave - Red
+        ".btn-danger { "
+        "   background-color: #B71C1C; "
+        "   color: #FFEBEE; "
+        "   border: 1px solid #E57373; "
+        "}"
+        ".btn-danger:hover { "
+        "   background-color: #C62828; "
+        "}"
+
+        // Special Game Actions
+        ".btn-bid-g { " /* Inherit Primary but bigger */
+        "   font-size: 24px; padding: 15px 30px; border-radius: 50px; "
+        "   background-image: linear-gradient(to bottom, #FFD700, #F57F17); "
+        "   color: #3E2723; "
+        "   box-shadow: 0 6px 12px rgba(255, 215, 0, 0.3); "
+        "}"
+        ".btn-bid-g:hover { "
+        "   background-image: linear-gradient(to bottom, #FFEA00, #F9A825); "
+        "   box-shadow: 0 8px 16px rgba(255, 215, 0, 0.4); "
+        "}"
+
+        // --- INPUTS ---
+        "entry { "
+        "   background-color: #4E0404; "
+        "   color: #FFECB3; "
+        "   border: 2px solid #5D4037; "
+        "   border-radius: 8px; "
+        "   padding: 10px; "
+        "   caret-color: #FFD700; "
+        "}"
+        "entry:focus { "
+        "   border-color: #FFD700; "
+        "   box-shadow: 0 0 4px rgba(255, 215, 0, 0.4); " /* Reduced Glow */
+        "}"
+
+        // --- CONTAINERS ---
+        // Login
+        ".login-box { background-color: #3E0404; border: 1px solid #FFD700; border-radius: 15px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }"
+        ".login-title { font-size: 32px; font-weight: 900; color: #FFD700; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }"
         
-        ".btn-lobby { background-image: none; background-color: #2ecc71; color: white; padding: 10px; border: none; }"
-        ".btn-lobby:hover { background-color: #27ae60; }"
+        // Lobby
+        ".lobby-box { background-color: #2B0505; padding: 20px; }"
+        ".lobby-title { font-size: 22px; font-weight: 800; color: #FFD700; border-bottom: 2px solid #B71C1C; padding-bottom: 5px; margin-bottom: 10px; }"
         
-        // Game Screen
-        ".game-header { background-color: #34495e; color: white; padding: 10px; border-radius: 0 0 10px 10px; }"
-        ".btn-leave { background-image: none; background-color: #e74c3c; color: white; font-size: 12px; padding: 4px 12px; border-radius: 15px; }"
-        ".game-image { border: 4px solid white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); background-color: #ecf0f1; }"
-        ".product-name { font-size: 18px; font-weight: bold; color: #2c3e50; margin: 10px 0; }"
-        ".input-bid { font-size: 20px; color: #27ae60; font-weight: bold; padding: 10px; }"
-        ".input-bid { font-size: 20px; color: #27ae60; font-weight: bold; padding: 10px; }"
-        ".btn-bid-g { background-image: none; background-color: #f39c12; color: white; font-size: 16px; padding: 12px; border-radius: 25px; }"
-        ".btn-start { background-image: none; background-color: #27ae60; color: white; font-weight: bold; border-radius: 15px; padding: 4px 12px; font-size: 12px; }" /* NEW */
-        ".btn-invite { background-image: none; background-color: #8e44ad; color: white; border-radius: 15px; padding: 4px 12px; font-size: 12px; margin-right: 5px; }" /* NEW */
-        ".game-log { font-family: 'Monospace'; font-size: 11px; background-color: #2c3e50; color: #ecf0f1; padding: 8px; }";
+        ".room-list { background-color: #1A0202; border: 1px solid #5D4037; border-radius: 8px; color: #FFF8E1; }"
+        "treeview { background-color: #1A0202; color: #FFF8E1; border: none; }"
+        "treeview:selected { background-color: #B71C1C; color: #FFD700; }"
+        "treeview header button { background-color: #3E0404; color: #FFECB3; font-weight: bold; border: none; }"
+        
+        // Game
+        ".game-header { background-color: #3E0404; border-bottom: 2px solid #FFD700; padding: 10px; }"
+        ".game-image { background-color: #000; border: 4px solid #FFD700; border-radius: 10px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }"
+        ".product-name { font-size: 24px; font-weight: 900; color: #FFD700; margin: 10px 0; text-shadow: 1px 1px 2px #000; }"
+        ".input-bid { font-size: 28px; font-weight: bold; border-color: #FFD700; }"
+        
+        ".game-log { font-family: 'Monospace'; font-size: 13px; background-color: #1A0202; color: #FFECB3; padding: 10px; border-radius: 8px; border: 1px solid #5D4037; }"
+        
+        // User Badge
+        ".user-badge { background-color: #4E0404; color: #FFD700; border: 1px solid #FFD700; border-radius: 15px; padding: 5px 15px; font-weight: bold; }"
+        
+        // Popups & Dialogs
+        "dialog, messagedialog { background-color: #3E0404; color: #FFD700; }"
+        "dialog label, messagedialog label { color: #FFF8E1; font-weight: bold; }"
+        "dialog button { background-color: #FFD700; color: #B71C1C; border: none; font-weight: bold; }"
+        "dialog button:hover { background-color: #FFEA00; }"
+        
+        ".toast-box { background-color: #4E0404; color: #FFD700; border: 2px solid #FFD700; border-radius: 10px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }"
+        
+        // Dropdowns & Menus
+        "menu { background-color: #3E0404; color: #FFD700; border: 1px solid #FFD700; }"
+        "menuitem { padding: 5px; }"
+        "menuitem:hover, menuitem:active { background-color: #FFD700; color: #B71C1C; }"
+        "combobox { color: #FFD700; background-color: #4E0404; }";
 
     gtk_css_provider_load_from_data(provider, css_data, -1, NULL);
     gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -631,7 +809,12 @@ void load_css() {
 void activate(GtkApplication *app, gpointer user_data) {
     load_css(); // Load styles
     window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Price Is Right");
+    // Custom Header Bar
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
+    gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Price Is Right");
+    gtk_window_set_titlebar(GTK_WINDOW(window), header);
+    
     gtk_window_set_default_size(GTK_WINDOW(window), 480, 720);
     
     stack = gtk_stack_new();
@@ -653,11 +836,11 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_entry_set_visibility(GTK_ENTRY(entry_pass), FALSE);
     
     GtkWidget *btn_login = gtk_button_new_with_label("Log In");
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_login), "btn-action");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_login), "btn-primary");
     g_signal_connect(btn_login, "clicked", G_CALLBACK(on_connect_click), NULL);
     
     GtkWidget *btn_reg = gtk_button_new_with_label("Create Account");
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_reg), "btn-action");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_reg), "btn-secondary");
     g_signal_connect(btn_reg, "clicked", G_CALLBACK(on_register_click), NULL);
     
     lbl_login_status = gtk_label_new("");
@@ -680,7 +863,9 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_halign(lbl_lobby, GTK_ALIGN_START);
     gtk_style_context_add_class(gtk_widget_get_style_context(lbl_lobby), "lobby-title");
     
+    
     lbl_lobby_user = gtk_label_new("User: ???");
+    gtk_style_context_add_class(gtk_widget_get_style_context(lbl_lobby_user), "user-badge");
     
     gtk_box_pack_start(GTK_BOX(lobby_header), lbl_lobby, TRUE, TRUE, 0);
     gtk_box_pack_end(GTK_BOX(lobby_header), lbl_lobby_user, FALSE, FALSE, 0);
@@ -698,6 +883,20 @@ void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *scroll_lobby = gtk_scrolled_window_new(NULL, NULL);
     gtk_container_add(GTK_CONTAINER(scroll_lobby), list_rooms);
     gtk_box_pack_start(GTK_BOX(box_lobby), scroll_lobby, TRUE, TRUE, 0);
+
+    // Empty State Label
+    lbl_empty_rooms = gtk_label_new("No rooms found. Create one!");
+    // Recycle lobby-title style or just use default text color? Lobby title has border-bottom, maybe overkill.
+    // Let's manually style it or use a new class if needed. Using login-title for emphasis? Too big.
+    // Let's assume default label inherits body text color (Milk White) which is good.
+    // Make it italic for nuance?
+    PangoAttrList *attrs = pango_attr_list_new();
+    pango_attr_list_insert(attrs, pango_attr_style_new(PANGO_STYLE_ITALIC));
+    gtk_label_set_attributes(GTK_LABEL(lbl_empty_rooms), attrs);
+    pango_attr_list_unref(attrs);
+    
+    gtk_box_pack_start(GTK_BOX(box_lobby), lbl_empty_rooms, FALSE, FALSE, 10);
+    gtk_widget_set_visible(lbl_empty_rooms, FALSE);
 
     // Online Players List
     GtkWidget *lbl_onl = gtk_label_new("Online Players");
@@ -720,26 +919,23 @@ void activate(GtkApplication *app, gpointer user_data) {
     
     GtkWidget *lobby_actions = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     btn_create = gtk_button_new_with_label("+ Create Room");
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_create), "btn-lobby");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_create), "btn-primary");
     g_signal_connect(btn_create, "clicked", G_CALLBACK(on_create_room_click), NULL);
     
     btn_join = gtk_button_new_with_label("Join Selected ->");
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_join), "btn-lobby");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_join), "btn-secondary");
     g_signal_connect(btn_join, "clicked", G_CALLBACK(on_join_room_click), NULL);
     
     gtk_box_pack_start(GTK_BOX(lobby_actions), btn_create, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(lobby_actions), btn_join, FALSE, FALSE, 0);
     
-    // Replay Button on separate line
-    GtkWidget *lobby_actions_2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    // Replay Button on SAME line
     btn_replay = gtk_button_new_with_label("Watch Replay"); /* Use Global */
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_replay), "btn-action");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_replay), "btn-tertiary");
+    gtk_box_pack_start(GTK_BOX(lobby_actions), btn_replay, FALSE, FALSE, 0);
     g_signal_connect(btn_replay, "clicked", G_CALLBACK(on_replay_click), NULL);
     
-    gtk_box_pack_start(GTK_BOX(lobby_actions_2), btn_replay, FALSE, FALSE, 0);
-    
     gtk_box_pack_start(GTK_BOX(box_lobby), lobby_actions, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(box_lobby), lobby_actions_2, FALSE, FALSE, 0);
     
     gtk_stack_add_named(GTK_STACK(stack), box_lobby, "lobby");
     
@@ -751,32 +947,36 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_style_context_add_class(gtk_widget_get_style_context(head), "game-header");
     
     lbl_game_title = gtk_label_new("Game Room");
-    lbl_game_user = gtk_label_new("");
+    lbl_game_user = gtk_label_new("User: ???");
+    gtk_style_context_add_class(gtk_widget_get_style_context(lbl_game_user), "user-badge");
     lbl_round = gtk_label_new("Round: -/-");
     lbl_score = gtk_label_new("Score: 0");
+    lbl_timer = gtk_label_new("Time: --"); /* NEW */
     
     GtkWidget *btn_leave = gtk_button_new_with_label("Leave");
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_leave), "btn-leave");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_leave), "btn-danger");
     g_signal_connect(btn_leave, "clicked", G_CALLBACK(on_leave_click), NULL);
     
     // Start Button (Hidden by default)
     btn_start_game = gtk_button_new_with_label("Start Game");
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_start_game), "btn-start");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_start_game), "btn-primary");
     g_signal_connect(btn_start_game, "clicked", G_CALLBACK(on_start_click), NULL);
     gtk_widget_set_visible(btn_start_game, FALSE); 
 
     // Invite Button
     btn_invite = gtk_button_new_with_label("+ Invite");
-    gtk_style_context_add_class(gtk_widget_get_style_context(btn_invite), "btn-invite");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_invite), "btn-secondary");
     g_signal_connect(btn_invite, "clicked", G_CALLBACK(on_invite_click), NULL);
 
     gtk_box_pack_start(GTK_BOX(head), lbl_game_title, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(head), lbl_game_user, FALSE, FALSE, 10); /* NEW */
+    // gtk_box_pack_start(GTK_BOX(head), lbl_game_user, FALSE, FALSE, 10); /* Moved */
     gtk_box_pack_start(GTK_BOX(head), lbl_round, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(head), lbl_score, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(head), lbl_timer, TRUE, TRUE, 0); /* NEW */
     gtk_box_pack_end(GTK_BOX(head), btn_leave, FALSE, FALSE, 0);
     gtk_box_pack_end(GTK_BOX(head), btn_start_game, FALSE, FALSE, 5);
     gtk_box_pack_end(GTK_BOX(head), btn_invite, FALSE, FALSE, 5); /* NEW */
+    gtk_box_pack_end(GTK_BOX(head), lbl_game_user, FALSE, FALSE, 10); /* NEW: Right Aligned */
     gtk_box_pack_start(GTK_BOX(box_game), head, FALSE, FALSE, 0);
     
     // Stage

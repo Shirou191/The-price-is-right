@@ -1,0 +1,62 @@
+--- Start Log ---
+chip joined via invite
+Owner started the game!
+Round 1/5: Honda_Vision_2024
+<<<STATS:1:5:0>>>
+<<<IMG:recv_vision.jpg>>>
+<<<BID:>>>
+chip bid: 5456
+huy bid: 5423
+huy earned 353 pts (Accuracy: 169, Time Bonus: 184)
+You earned 362 pts (Accuracy: 170, Time Bonus: 192)
+Price: 32000. Winner: chip (+362 pts)!
+LEADERBOARD:
+huy: 353
+chip: 362
+
+<<<STATS:1:5:362>>>
+Round 2/5: Laptop_Dell_XPS
+<<<STATS:2:5:362>>>
+<<<IMG:recv_dell.jpg>>>
+<<<BID:>>>
+chip bid: 6537
+huy bid: 5245
+huy earned 336 pts (Accuracy: 116, Time Bonus: 219)
+You earned 371 pts (Accuracy: 145, Time Bonus: 226)
+Price: 45000. Winner: chip (+371 pts)!
+LEADERBOARD:
+huy: 689
+chip: 733
+
+<<<STATS:2:5:733>>>
+Round 3/5: My_Tom_Hao_Hao
+<<<STATS:3:5:733>>>
+<<<IMG:recv_hao_hao.jpg>>>
+<<<BID:>>>
+chip bid: 3
+huy bid: 5
+huy earned 1228 pts (Accuracy: 1000, Time Bonus: 228)
+You earned 835 pts (Accuracy: 600, Time Bonus: 235)
+Price: 5. Winner: huy (+1228 pts)!
+LEADERBOARD:
+huy: 1917
+chip: 1568
+
+<<<STATS:3:5:1568>>>
+Round 4/5: Giay_Nike_Jordan
+<<<STATS:4:5:1568>>>
+<<<IMG:recv_jordan.png>>>
+<<<BID:>>>
+chip bid: 4543
+huy bid: 5436
+You earned 1127 pts (Accuracy: 908, Time Bonus: 218)
+Price: 5000. Winner: chip (+1127 pts)!
+LEADERBOARD:
+huy: 1917
+chip: 2695
+
+<<<STATS:4:5:2695>>>
+Round 5/5: Iphone_15_Pro_Max
+<<<STATS:5:5:2695>>>
+<<<IMG:recv_iphone.jpg>>>
+--- End Log ---

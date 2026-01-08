@@ -58,6 +58,9 @@ GtkWidget *lbl_timer; /* NEW */
 guint round_timer_id = 0;
 int round_time_left = 30;
 
+// Toasts
+GtkWidget *current_toast = NULL; /* Correctly Declared Here */
+
 // --- NETWORK HELPERS ---
 void send_packet(int type, const char *payload) {
     uint32_t t = htonl(type);
@@ -135,6 +138,11 @@ gboolean on_round_timer(gpointer data) {
 
 void start_round_timer() {
     if(round_timer_id > 0) g_source_remove(round_timer_id);
+    
+    // Clear any lingering toast
+    // Clear any lingering toast
+    clear_toasts();
+    
     round_time_left = 30;
     gtk_label_set_text(GTK_LABEL(lbl_timer), "Time: 30s");
     round_timer_id = g_timeout_add(1000, on_round_timer, NULL);
@@ -149,19 +157,47 @@ void stop_round_timer() {
 }
 
 // Toast Helper
+// Toast Helper
+
+// Toast Helper
+// GtkWidget *current_toast = NULL; (Already declared globally)
+GList *toast_queue = NULL;
+guint toast_timer_id = 0;
+
+void process_toast_queue();
+
 gboolean on_toast_timeout(gpointer data) {
-    gtk_widget_destroy(GTK_WIDGET(data));
+    toast_timer_id = 0; /* Timer fired, so it's gone */
+    
+    if ((GtkWidget*)data == current_toast) {
+        current_toast = NULL;
+    }
+    
+    if (GTK_IS_WIDGET(data)) {
+        gtk_widget_destroy(GTK_WIDGET(data));
+    }
+    
+    // Process next toast
+    process_toast_queue();
     return FALSE;
 }
 
-void show_toast(const char *msg) {
+void process_toast_queue() {
+    if (current_toast) return; // Wait for current to finish
+    if (!toast_queue) return;
+    
+    char *msg = (char*)toast_queue->data;
+    toast_queue = g_list_remove(toast_queue, msg);
+    
     GtkWidget *win = gtk_window_new(GTK_WINDOW_POPUP);
+    current_toast = win;
+    
     GtkWidget *frame = gtk_frame_new(NULL);
-    gtk_style_context_add_class(gtk_widget_get_style_context(frame), "toast-box"); /* NEW */
+    gtk_style_context_add_class(gtk_widget_get_style_context(frame), "toast-box");
     gtk_container_add(GTK_CONTAINER(win), frame);
     
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_container_set_border_width(GTK_CONTAINER(box), 20); // Padding
+    gtk_container_set_border_width(GTK_CONTAINER(box), 20);
     gtk_container_add(GTK_CONTAINER(frame), box);
     
     GtkWidget *lbl = gtk_label_new(msg);
@@ -172,7 +208,34 @@ void show_toast(const char *msg) {
     gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
     
     gtk_widget_show_all(win);
-    g_timeout_add(2000, on_toast_timeout, win);
+    
+    // Save Timer ID
+    if(toast_timer_id > 0) g_source_remove(toast_timer_id);
+    toast_timer_id = g_timeout_add(3000, on_toast_timeout, win); /* Reduced to 3s */
+    
+    g_free(msg);
+}
+
+void show_toast(const char *msg) {
+    toast_queue = g_list_append(toast_queue, g_strdup(msg));
+    process_toast_queue();
+}
+
+void clear_toasts() {
+    if(toast_timer_id > 0) {
+        g_source_remove(toast_timer_id);
+        toast_timer_id = 0;
+    }
+    
+    if (current_toast) {
+        gtk_widget_destroy(current_toast);
+        current_toast = NULL;
+    }
+    
+    if (toast_queue) {
+        g_list_free_full(toast_queue, g_free);
+        toast_queue = NULL;
+    }
 }
 
 gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer data) {
@@ -319,6 +382,7 @@ gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer dat
                                      "%s", buf);
         gtk_dialog_run(GTK_DIALOG(dialog));
         gtk_widget_destroy(dialog);
+        append_log(buf); /* Fix: Log Final Result */
     }
     else if (type == PT_GAME_QUESTION) {
         gtk_label_set_text(GTK_LABEL(lbl_product_name), buf);
@@ -360,6 +424,8 @@ gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer dat
         append_log(buf);
     }
     else if (type == PT_GAME_LEADERBOARD) {
+        // Show Leaderboard Popup (Queued)
+        show_toast(buf);
         append_log(buf);
     }
     else if (type == PT_GAME_STATS) {
@@ -468,10 +534,37 @@ gboolean replay_step(gpointer data) {
             gtk_label_set_text(GTK_LABEL(lbl_score), sc);
         }
     } else {
-        if(strstr(line, "You earned")) {
-            show_toast(line);
+        // --- Multiline Popups ---
+        if (strncmp(line, "LEADERBOARD:", 12) == 0 || strncmp(line, "--- FINAL RESULTS ---", 21) == 0) {
+            // Aggregate following lines until empty or start with <<<
+            GString *msg = g_string_new(line);
+            g_string_append_c(msg, '\n');
+            
+            while(replay_lines->next) {
+                char *next_line = (char*)replay_lines->next->data;
+                // Stop if internal tag or another header (simplified)
+                if (strncmp(next_line, "<<<", 3) == 0 || strlen(next_line) == 0) break;
+                
+                g_string_append(msg, next_line);
+                g_string_append_c(msg, '\n');
+                
+                // Advance line and free current
+                g_free(line); 
+                replay_lines = g_list_delete_link(replay_lines, replay_lines); // Move head
+                line = (char*)replay_lines->data; // Look at next
+            }
+            show_toast(msg->str);
+            append_log(msg->str);
+            g_string_free(msg, TRUE);
+            
+            // "line" now points to last processed line, which loop will free at end
         }
-        append_log(line);
+        else if(strstr(line, "You earned") || strstr(line, "You overbid!") || strstr(line, "Price:") || strstr(line, "WINNER:")) {
+            show_toast(line);
+            append_log(line);
+        } else {
+            append_log(line);
+        }
     }
     
     g_free(line);
@@ -586,20 +679,35 @@ void on_leave_click() {
 void on_bid_click() {
     const char *bid_text = gtk_entry_get_text(GTK_ENTRY(entry_bid));
     if(strlen(bid_text) > 0) {
-        send_packet(PT_GAME_BID, bid_text);
-        gtk_entry_set_text(GTK_ENTRY(entry_bid), "");
-        stop_round_timer(); /* Stop Timer on Bid */
-        
-        // Log Bid
+        // Log Bid FIRST to capture text
         if(replay_log) {
             fprintf(replay_log, "<<<BID:%s>>>\n", bid_text);
             fflush(replay_log);
         }
+        
+        send_packet(PT_GAME_BID, bid_text);
+        gtk_entry_set_text(GTK_ENTRY(entry_bid), "");
+        stop_round_timer(); /* Stop Timer on Bid */
     }
 }
 
 void on_start_click() {
     send_packet(PT_START_GAME, "");
+}
+
+
+
+void on_logout_click() {
+    send_packet(PT_LOGOUT, "");
+    my_username[0] = 0;
+    gtk_entry_set_text(GTK_ENTRY(entry_user), "");
+    gtk_entry_set_text(GTK_ENTRY(entry_pass), "");
+    
+    // Clear lists
+    gtk_list_store_clear(store_rooms);
+    gtk_list_store_clear(store_players_online);
+    
+    gtk_stack_set_visible_child_name(GTK_STACK(stack), "login");
 }
 
 void on_invite_click() {
@@ -761,6 +869,13 @@ void load_css() {
         "   border-color: #FFD700; "
         "   box-shadow: 0 0 4px rgba(255, 215, 0, 0.4); " /* Reduced Glow */
         "}"
+        
+        "entry:disabled { "
+        "   background-color: #3E1010; "
+        "   color: #FFD700; "
+        "   opacity: 1.0; "
+        "   border-color: #5D4037; "
+        "}"
 
         // --- CONTAINERS ---
         // Login
@@ -863,12 +978,19 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_halign(lbl_lobby, GTK_ALIGN_START);
     gtk_style_context_add_class(gtk_widget_get_style_context(lbl_lobby), "lobby-title");
     
-    
+        
+    gtk_box_pack_start(GTK_BOX(lobby_header), lbl_lobby, TRUE, TRUE, 0);
+
     lbl_lobby_user = gtk_label_new("User: ???");
     gtk_style_context_add_class(gtk_widget_get_style_context(lbl_lobby_user), "user-badge");
     
-    gtk_box_pack_start(GTK_BOX(lobby_header), lbl_lobby, TRUE, TRUE, 0);
-    gtk_box_pack_end(GTK_BOX(lobby_header), lbl_lobby_user, FALSE, FALSE, 0);
+    GtkWidget *btn_logout = gtk_button_new_with_label("Log Out");
+    gtk_style_context_add_class(gtk_widget_get_style_context(btn_logout), "btn-danger");
+    g_signal_connect(btn_logout, "clicked", G_CALLBACK(on_logout_click), NULL);
+    
+
+    gtk_box_pack_end(GTK_BOX(lobby_header), btn_logout, FALSE, FALSE, 0); /* Far right */
+    gtk_box_pack_end(GTK_BOX(lobby_header), lbl_lobby_user, FALSE, FALSE, 10); /* Left of logout */
     gtk_box_pack_start(GTK_BOX(box_lobby), lobby_header, FALSE, FALSE, 0);
     
     store_rooms = gtk_list_store_new(3, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);

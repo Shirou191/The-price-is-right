@@ -1,0 +1,78 @@
+--- Start Log ---
+Room 1 Created (You are Owner)
+huy joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+huy bid: 6435
+<<<BID:6356>>>
+quan bid: 6356
+You earned 434 pts (Price: 30000, Accuracy: 211, Time Bonus: 222)
+huy earned 461 pts (Accuracy: 214, Time Bonus: 246)
+Price: 30000. Winner: huy (+461 pts)!
+LEADERBOARD:
+quan: 434
+huy: 461
+
+<<<STATS:1:5:434>>>
+Round 2/5: Honda_Vision_2024
+<<<STATS:2:5:434>>>
+<<<IMG:recv_vision.jpg>>>
+huy bid: 5324
+<<<BID:5346>>>
+quan bid: 5346
+You earned 399 pts (Price: 32000, Accuracy: 167, Time Bonus: 232)
+huy earned 405 pts (Accuracy: 166, Time Bonus: 239)
+Price: 32000. Winner: huy (+405 pts)!
+LEADERBOARD:
+quan: 833
+huy: 866
+
+<<<STATS:2:5:833>>>
+Round 3/5: Laptop_Dell_XPS
+<<<STATS:3:5:833>>>
+<<<IMG:recv_dell.jpg>>>
+<<<BID:75467>>>
+quan bid: 75467
+huy bid: 52566
+You overbid! (Price: 45000)
+Price: 45000. No winners (all overbid).
+LEADERBOARD:
+quan: 833
+huy: 866
+
+<<<STATS:3:5:833>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<STATS:4:5:833>>>
+<<<IMG:recv_hao_hao.jpg>>>
+huy bid: 5
+<<<BID:5>>>
+quan bid: 5
+You earned 1226 pts (Price: 5, Accuracy: 1000, Time Bonus: 226)
+huy earned 1232 pts (Accuracy: 1000, Time Bonus: 232)
+Price: 5. Winner: huy (+1232 pts)!
+LEADERBOARD:
+quan: 2059
+huy: 2098
+
+<<<STATS:4:5:2059>>>
+Round 5/5: Giay_Nike_Jordan
+<<<STATS:5:5:2059>>>
+<<<IMG:recv_jordan.png>>>
+huy bid: 6356
+<<<BID:6355>>>
+quan bid: 6355
+You overbid! (Price: 5000)
+Price: 5000. No winners (all overbid).
+LEADERBOARD:
+quan: 2059
+huy: 2098
+
+<<<STATS:5:5:2059>>>
+--- FINAL RESULTS ---
+quan: 2059 pts
+huy: 2098 pts
+
+WINNER: huy!
+--- End Log ---

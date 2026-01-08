@@ -1,0 +1,72 @@
+--- Start Log ---
+Room 1 Created (You are Owner)
+huy joined Room 1
+Owner started the game!
+Round 1/5: Laptop_Dell_XPS
+<<<STATS:1:5:0>>>
+<<<IMG:recv_dell.jpg>>>
+huy bid: 4364
+<<<BID:6356>>>
+quan bid: 6356
+You earned 386 pts (Accuracy: 141, Time Bonus: 244)
+huy earned 348 pts (Accuracy: 96, Time Bonus: 251)
+Price: 45000. Winner: quan (+386 pts)!
+LEADERBOARD:
+quan: 386
+huy: 348
+
+<<<STATS:1:5:386>>>
+Round 2/5: My_Tom_Hao_Hao
+<<<STATS:2:5:386>>>
+<<<IMG:recv_hao_hao.jpg>>>
+<<<BID:5>>>
+quan bid: 5
+huy bid: 5
+You earned 1200 pts (Accuracy: 1000, Time Bonus: 200)
+huy earned 1190 pts (Accuracy: 1000, Time Bonus: 190)
+Price: 5. Winner: quan (+1200 pts)!
+LEADERBOARD:
+quan: 1586
+huy: 1538
+
+<<<STATS:2:5:1586>>>
+Round 3/5: Giay_Nike_Jordan
+<<<STATS:3:5:1586>>>
+<<<IMG:recv_jordan.png>>>
+huy bid: 54326
+<<<BID:75467>>>
+quan bid: 75467
+You overbid! (Price: 5000)
+Price: 5000. No winners (all overbid).
+LEADERBOARD:
+quan: 1586
+huy: 1538
+
+<<<STATS:3:5:1586>>>
+Round 4/5: Iphone_15_Pro_Max
+<<<STATS:4:5:1586>>>
+<<<IMG:recv_iphone.jpg>>>
+huy bid: 53466
+<<<BID:54366>>>
+quan bid: 54366
+You overbid! (Price: 30000)
+Price: 30000. No winners (all overbid).
+LEADERBOARD:
+quan: 1586
+huy: 1538
+
+<<<STATS:4:5:1586>>>
+Round 5/5: Honda_Vision_2024
+<<<STATS:5:5:1586>>>
+<<<IMG:recv_vision.jpg>>>
+huy bid: 54326
+<<<BID:63666>>>
+quan bid: 63666
+You overbid! (Price: 32000)
+Price: 32000. No winners (all overbid).
+LEADERBOARD:
+quan: 1586
+huy: 1538
+
+<<<STATS:5:5:1586>>>
+--- End Log ---

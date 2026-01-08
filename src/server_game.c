@@ -330,7 +330,7 @@ void check_round_logic(int r_idx) {
                 
                 // Send Private Breakdown
                 char p_msg[128];
-                snprintf(p_msg, sizeof(p_msg), "You earned %d pts (Accuracy: %d, Time Bonus: %d)", total, (int)base_score, (int)time_bonus);
+                snprintf(p_msg, sizeof(p_msg), "You earned %d pts (Price: %d, Accuracy: %d, Time Bonus: %d)", total, price, (int)base_score, (int)time_bonus);
                 send_packet(players[i].socket_fd, PT_GAME_MSG, p_msg, strlen(p_msg));
                 
                 // Broadcast Public Detailed Score to OTHERS only
@@ -384,7 +384,7 @@ void check_round_logic(int r_idx) {
         }
     }
     
-    sleep(3);
+    sleep(7); /* Increased to allow full toast queue (Score + Leaderboard) to show */
     start_round(r_idx);
 }
 
@@ -444,6 +444,21 @@ void handle_client_msg(int idx) {
             }
         }
         if(!found) send_packet(sock, PT_LOGIN_RESP, "FAIL", 4);
+    }
+    else if (type == PT_LOGOUT) {
+        printf("Client %d logged out.\n", idx);
+        // Leave Room if in one
+        if(players[idx].room_id > 0) {
+             Room *r = &rooms[players[idx].room_id];
+             r->player_count--;
+             if(r->player_count == 0) r->active = 0; 
+             broadcast_lobby_state(); 
+        }
+        players[idx].room_id = 0;
+        players[idx].is_logged_in = 0;
+        memset(players[idx].username, 0, 32);
+        
+        broadcast_player_list();
     }
     else if (type == PT_REGISTER) {
         char *u = strtok(buf, ":");

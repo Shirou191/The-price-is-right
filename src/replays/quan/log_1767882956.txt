@@ -1,0 +1,34 @@
+--- Start Log ---
+quan joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+<<<BID:6345>>>
+quan bid: 6345
+huy bid: 6535
+huy earned 477 pts (Accuracy: 217, Time Bonus: 259)
+You earned 476 pts (Price: 30000, Accuracy: 211, Time Bonus: 265)
+Price: 30000. Winner: huy (+477 pts)!
+LEADERBOARD:
+huy: 477
+quan: 476
+
+<<<STATS:1:5:476>>>
+Round 2/5: Honda_Vision_2024
+<<<STATS:2:5:476>>>
+<<<IMG:recv_vision.jpg>>>
+<<<BID:4255>>>
+quan bid: 4255
+huy bid: 5435
+huy earned 378 pts (Accuracy: 169, Time Bonus: 208)
+You earned 348 pts (Price: 32000, Accuracy: 132, Time Bonus: 215)
+Price: 32000. Winner: huy (+378 pts)!
+LEADERBOARD:
+huy: 855
+quan: 824
+
+<<<STATS:2:5:824>>>
+Round 3/5: Laptop_Dell_XPS
+<<<STATS:3:5:824>>>
+<<<IMG:recv_dell.jpg>>>

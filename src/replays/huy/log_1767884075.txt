@@ -1,0 +1,8 @@
+--- Start Log ---
+huy joined via invite
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+Room 2 Created (You are Owner)
+--- End Log ---

@@ -1,0 +1,102 @@
+--- Start Log ---
+Room 1 Created (You are Owner)
+quan joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<PROD:Iphone_15_Pro_Max>>>
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+quan bid: 32244
+<<<BID:54354>>>
+huy bid: 54354
+You overbid! (Price: 30000)
+Price: 30000. No winners (all overbid).
+--- ROUND 1 RESULTS ---
+quan: Bid 32244 | Overbid!
+huy: Bid 54354 | Overbid!
+
+LEADERBOARD:
+quan: 0
+huy: 0
+
+<<<STATS:1:5:0>>>
+Round 2/5: Honda_Vision_2024
+<<<PROD:Honda_Vision_2024>>>
+<<<STATS:2:5:0>>>
+<<<IMG:recv_vision.jpg>>>
+quan bid: 43244
+<<<BID:5433>>>
+huy bid: 5433
+You earned 361 pts (Price: 32000, Accuracy: 169, Time Bonus: 192)
+Price: 32000. Winner: huy (+361 pts)!
+--- ROUND 2 RESULTS ---
+quan: Bid 43244 | Overbid!
+huy: Bid 5433 | +361 pts (Acc: 169, Time: 192)
+
+LEADERBOARD:
+quan: 0
+huy: 361
+
+<<<STATS:2:5:361>>>
+Round 3/5: Laptop_Dell_XPS
+<<<PROD:Laptop_Dell_XPS>>>
+<<<STATS:3:5:361>>>
+<<<IMG:recv_dell.jpg>>>
+quan bid: 5435
+<<<BID:35436>>>
+huy bid: 35436
+quan earned 374 pts (Accuracy: 120, Time Bonus: 253)
+You earned 1033 pts (Price: 45000, Accuracy: 787, Time Bonus: 246)
+Price: 45000. Winner: huy (+1033 pts)!
+--- ROUND 3 RESULTS ---
+quan: Bid 5435 | +374 pts (Acc: 120, Time: 253)
+huy: Bid 35436 | +1033 pts (Acc: 787, Time: 246)
+
+LEADERBOARD:
+quan: 374
+huy: 1394
+
+<<<STATS:3:5:1394>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<PROD:My_Tom_Hao_Hao>>>
+<<<STATS:4:5:1394>>>
+<<<IMG:recv_hao_hao.jpg>>>
+quan bid: 4
+<<<BID:5>>>
+huy bid: 5
+quan earned 1058 pts (Accuracy: 800, Time Bonus: 258)
+You earned 1252 pts (Price: 5, Accuracy: 1000, Time Bonus: 252)
+Price: 5. Winner: huy (+1252 pts)!
+--- ROUND 4 RESULTS ---
+quan: Bid 4 | +1058 pts (Acc: 800, Time: 258)
+huy: Bid 5 | +1252 pts (Acc: 1000, Time: 252)
+
+LEADERBOARD:
+quan: 1432
+huy: 2646
+
+<<<STATS:4:5:2646>>>
+Round 5/5: Giay_Nike_Jordan
+<<<PROD:Giay_Nike_Jordan>>>
+<<<STATS:5:5:2646>>>
+<<<IMG:recv_jordan.png>>>
+quan bid: 6535
+<<<BID:5435>>>
+huy bid: 5435
+You overbid! (Price: 5000)
+Price: 5000. No winners (all overbid).
+--- ROUND 5 RESULTS ---
+quan: Bid 6535 | Overbid!
+huy: Bid 5435 | Overbid!
+
+LEADERBOARD:
+quan: 1432
+huy: 2646
+
+<<<STATS:5:5:2646>>>
+--- FINAL RESULTS ---
+quan: 1432 pts
+huy: 2646 pts
+
+WINNER: huy!
+--- End Log ---

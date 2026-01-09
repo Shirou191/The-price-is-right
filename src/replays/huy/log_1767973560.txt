@@ -1,0 +1,101 @@
+--- Start Log ---
+Room 1 Created (You are Owner)
+quan joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<PROD:Iphone_15_Pro_Max>>>
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+<<<BID:24333>>>
+huy bid: 24333
+quan bid: 54356
+You earned 946 pts (Price: 30000, Accuracy: 811, Time Bonus: 135)
+Price: 30000. Winner: huy (+946 pts)!
+--- ROUND 1 RESULTS ---
+quan: Bid 54356 | Overbid!
+huy: Bid 24333 | +946 pts (Acc: 811, Time: 135)
+
+LEADERBOARD:
+huy: 946
+quan: 0
+
+<<<STATS:1:5:946>>>
+Round 2/5: Honda_Vision_2024
+<<<PROD:Honda_Vision_2024>>>
+<<<STATS:2:5:946>>>
+<<<IMG:recv_vision.jpg>>>
+<<<BID:64355>>>
+huy bid: 64355
+quan bid: 5435
+quan earned 394 pts (Accuracy: 169, Time Bonus: 224)
+You overbid! (Price: 32000)
+Price: 32000. Winner: quan (+394 pts)!
+--- ROUND 2 RESULTS ---
+quan: Bid 5435 | +394 pts (Acc: 169, Time: 224)
+huy: Bid 64355 | Overbid!
+
+LEADERBOARD:
+huy: 946
+quan: 394
+
+<<<STATS:2:5:946>>>
+Round 3/5: Laptop_Dell_XPS
+<<<PROD:Laptop_Dell_XPS>>>
+<<<STATS:3:5:946>>>
+<<<IMG:recv_dell.jpg>>>
+<<<BID:54356>>>
+huy bid: 54356
+quan bid: 63555
+You overbid! (Price: 45000)
+Price: 45000. No winners (all overbid).
+--- ROUND 3 RESULTS ---
+quan: Bid 63555 | Overbid!
+huy: Bid 54356 | Overbid!
+
+LEADERBOARD:
+huy: 946
+quan: 394
+
+<<<STATS:3:5:946>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<PROD:My_Tom_Hao_Hao>>>
+<<<STATS:4:5:946>>>
+<<<IMG:recv_hao_hao.jpg>>>
+<<<BID:6>>>
+huy bid: 6
+quan bid: 5
+quan earned 1264 pts (Accuracy: 1000, Time Bonus: 264)
+You overbid! (Price: 5)
+Price: 5. Winner: quan (+1264 pts)!
+--- ROUND 4 RESULTS ---
+quan: Bid 5 | +1264 pts (Acc: 1000, Time: 264)
+huy: Bid 6 | Overbid!
+
+LEADERBOARD:
+quan: 1658
+huy: 946
+
+<<<STATS:4:5:946>>>
+Round 5/5: Giay_Nike_Jordan
+<<<PROD:Giay_Nike_Jordan>>>
+<<<STATS:5:5:946>>>
+<<<IMG:recv_jordan.png>>>
+<<<BID:5435>>>
+huy bid: 5435
+quan bid: 6356
+You overbid! (Price: 5000)
+Price: 5000. No winners (all overbid).
+--- ROUND 5 RESULTS ---
+quan: Bid 6356 | Overbid!
+huy: Bid 5435 | Overbid!
+
+LEADERBOARD:
+quan: 1658
+huy: 946
+
+<<<STATS:5:5:946>>>
+--- FINAL RESULTS ---
+quan: 1658 pts
+huy: 946 pts
+WINNER: quan!
+--- End Log ---

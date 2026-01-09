@@ -177,23 +177,44 @@ void end_game(int r_idx) {
     
     Room *room = &rooms[r_idx];
     
+    // Sort Players for Final Results
+    Player *sorted_players[MAX_CLIENTS];
+    int count = 0;
     for(int i=0; i<MAX_CLIENTS; i++) {
         if(players[i].socket_fd > 0 && players[i].room_id == r_idx) {
-            char line[64];
-            snprintf(line, sizeof(line), "%s: %d pts\n", players[i].username, players[i].score);
-            strcat(msg, line);
+            sorted_players[count++] = &players[i];
             
-            // Update Stats
-            for(int k=0; k<account_count; k++) {
-                if(strcmp(accounts[k].username, players[i].username) == 0) {
-                    accounts[k].games_played++;
-                    accounts[k].total_score += players[i].score;
-                }
-            }
-
+            // Track Winner (Max Score)
             if(players[i].score > max_score) {
                 max_score = players[i].score;
                 winner_idx = i;
+            }
+        }
+    }
+    
+    // Bubble Sort (Simple enough for small N)
+    for(int i=0; i<count-1; i++) {
+        for(int j=0; j<count-i-1; j++) {
+            if(sorted_players[j]->score < sorted_players[j+1]->score) {
+                Player *temp = sorted_players[j];
+                sorted_players[j] = sorted_players[j+1];
+                sorted_players[j+1] = temp;
+            }
+        }
+    }
+    
+    for(int i=0; i<count; i++) {
+        char line[64];
+        snprintf(line, sizeof(line), "%s: %d pts\n", sorted_players[i]->username, sorted_players[i]->score);
+        strcat(msg, line);
+        
+        // Update Stats (do this here or in original loop? Original loop safer for ensuring everyone processed)
+        // Re-looping for stats update to be safe and separate from display logic? 
+        // No, can do it here. sorted_players points to real players.
+        for(int k=0; k<account_count; k++) {
+            if(strcmp(accounts[k].username, sorted_players[i]->username) == 0) {
+                accounts[k].games_played++;
+                accounts[k].total_score += sorted_players[i]->score;
             }
         }
     }
@@ -205,7 +226,7 @@ void end_game(int r_idx) {
             }
         }
         char w[100];
-        snprintf(w, sizeof(w), "\nWINNER: %s!", players[winner_idx].username);
+        snprintf(w, sizeof(w), "WINNER: %s!", players[winner_idx].username); /* Removed \n */
         strcat(msg, w);
     }
     
@@ -308,32 +329,46 @@ void check_round_logic(int r_idx) {
     
     int winner_idx = -1;
     double max_round_score = -1;
+
+    char round_summary[2048];
+    round_summary[0] = 0;
+    char buf[512];
     
     for(int i=0; i<MAX_CLIENTS; i++) {
         if(players[i].socket_fd > 0 && players[i].room_id == r_idx) {
             int bid = players[i].current_bid;
+            char p_line[128];
+            
             if(bid <= price) {
-                // Accuracy Score (0-1000)
+                // ... (Calculation Logic unchanged) ...
                 double accuracy = (double)bid / price;
                 double base_score = accuracy * 1000.0;
                 
-                // Time Bonus
                 double time_taken = (players[i].bid_time.tv_sec - room->round_start_time.tv_sec) + 
                                     (players[i].bid_time.tv_usec - room->round_start_time.tv_usec) / 1000000.0;
                 double time_bonus = 0;
                 if(time_taken < ROUND_TIME_SEC) {
-                    time_bonus = (ROUND_TIME_SEC - time_taken) * 10; // 10 pts per sec saved
+                    time_bonus = (ROUND_TIME_SEC - time_taken) * 10; 
                 }
                 
                 int total = (int)(base_score + time_bonus);
                 players[i].score += total;
                 
+                // Construct Summary Line
+                snprintf(p_line, sizeof(p_line), "%s: Bid %d | +%d pts (Acc: %d, Time: %d)\n", 
+                        players[i].username, bid, total, (int)base_score, (int)time_bonus);
+                strcat(round_summary, p_line);
+
                 // Send Private Breakdown
                 char p_msg[128];
                 snprintf(p_msg, sizeof(p_msg), "You earned %d pts (Price: %d, Accuracy: %d, Time Bonus: %d)", total, price, (int)base_score, (int)time_bonus);
                 send_packet(players[i].socket_fd, PT_GAME_MSG, p_msg, strlen(p_msg));
                 
-                // Broadcast Public Detailed Score to OTHERS only
+                // Broadcast Public Detailed Score to OTHERS only (KEEPING THIS FOR NOW BUT SUMMARY MIGHT REPLACE IT?)
+                // Actually the user wants popups. This sends GAME_MSG which usually logs.
+                // Summary is GAME_RESULT which toasts.
+                // I will keep this for log/chat history.
+                
                 char pub_msg[128];
                 snprintf(pub_msg, sizeof(pub_msg), "%s earned %d pts (Accuracy: %d, Time Bonus: %d)", players[i].username, total, (int)base_score, (int)time_bonus);
                 
@@ -348,7 +383,10 @@ void check_round_logic(int r_idx) {
                     winner_idx = i;
                 }
             } else {
-                // Overbid message
+                // Overbid
+                snprintf(p_line, sizeof(p_line), "%s: Bid %d | Overbid!\n", players[i].username, bid);
+                strcat(round_summary, p_line);
+                
                 char p_msg[64];
                 snprintf(p_msg, sizeof(p_msg), "You overbid! (Price: %d)", price);
                 send_packet(players[i].socket_fd, PT_GAME_MSG, p_msg, strlen(p_msg));
@@ -356,23 +394,50 @@ void check_round_logic(int r_idx) {
         }
     }
     
-    char buf[512];
+    // Determine Winner Info First
     if(winner_idx != -1) {
         snprintf(buf, sizeof(buf), "Price: %d. Winner: %s (+%d pts)!", price, players[winner_idx].username, (int)max_round_score);
     } else {
         snprintf(buf, sizeof(buf), "Price: %d. No winners (all overbid).", price);
     }
-    broadcast_room(r_idx, PT_GAME_RESULT, buf);
     
-    // Leaderboard
+    // Header: Winner Info + Round Header
+    // Prepend the winner/price info to the round summary
+    char final_round_summary[2048];
+    snprintf(final_round_summary, sizeof(final_round_summary), "%s\n--- ROUND %d RESULTS ---\n%s", buf, room->current_round, round_summary);
+    
+    // Broadcast Summary (buf already included at start)
+    broadcast_room(r_idx, PT_GAME_RESULT, final_round_summary);
+    
+    // Leaderboard (Sorted)
     char lb[1024] = "LEADERBOARD:\n";
+    
+    Player *sorted_lb[MAX_CLIENTS];
+    int lb_count = 0;
+    
     for(int i=0; i<MAX_CLIENTS; i++) {
         if(players[i].room_id == r_idx) {
-            char l[64];
-            snprintf(l, sizeof(l), "%s: %d\n", players[i].username, players[i].score);
-            strcat(lb, l);
+            sorted_lb[lb_count++] = &players[i];
         }
     }
+    
+    // Bubble Sort
+    for(int i=0; i<lb_count-1; i++) {
+        for(int j=0; j<lb_count-i-1; j++) {
+            if(sorted_lb[j]->score < sorted_lb[j+1]->score) {
+                Player *temp = sorted_lb[j];
+                sorted_lb[j] = sorted_lb[j+1];
+                sorted_lb[j+1] = temp;
+            }
+        }
+    }
+    
+    for(int i=0; i<lb_count; i++) {
+        char l[64];
+        snprintf(l, sizeof(l), "%s: %d\n", sorted_lb[i]->username, sorted_lb[i]->score);
+        strcat(lb, l);
+    }
+
     broadcast_room(r_idx, PT_GAME_LEADERBOARD, lb);
     
     // Update Stats HUD after scoring

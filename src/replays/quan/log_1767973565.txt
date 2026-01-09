@@ -1,0 +1,99 @@
+--- Start Log ---
+quan joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<PROD:Iphone_15_Pro_Max>>>
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+huy bid: 24333
+<<<BID:54356>>>
+quan bid: 54356
+You overbid! (Price: 30000)
+huy earned 946 pts (Accuracy: 811, Time Bonus: 135)
+Price: 30000. Winner: huy (+946 pts)!
+--- ROUND 1 RESULTS ---
+quan: Bid 54356 | Overbid!
+huy: Bid 24333 | +946 pts (Acc: 811, Time: 135)
+
+LEADERBOARD:
+huy: 946
+quan: 0
+
+<<<STATS:1:5:0>>>
+Round 2/5: Honda_Vision_2024
+<<<PROD:Honda_Vision_2024>>>
+<<<STATS:2:5:0>>>
+<<<IMG:recv_vision.jpg>>>
+huy bid: 64355
+<<<BID:5435>>>
+quan bid: 5435
+You earned 394 pts (Price: 32000, Accuracy: 169, Time Bonus: 224)
+Price: 32000. Winner: quan (+394 pts)!
+--- ROUND 2 RESULTS ---
+quan: Bid 5435 | +394 pts (Acc: 169, Time: 224)
+huy: Bid 64355 | Overbid!
+
+LEADERBOARD:
+huy: 946
+quan: 394
+
+<<<STATS:2:5:394>>>
+Round 3/5: Laptop_Dell_XPS
+<<<PROD:Laptop_Dell_XPS>>>
+<<<STATS:3:5:394>>>
+<<<IMG:recv_dell.jpg>>>
+huy bid: 54356
+<<<BID:63555>>>
+quan bid: 63555
+You overbid! (Price: 45000)
+Price: 45000. No winners (all overbid).
+--- ROUND 3 RESULTS ---
+quan: Bid 63555 | Overbid!
+huy: Bid 54356 | Overbid!
+
+LEADERBOARD:
+huy: 946
+quan: 394
+
+<<<STATS:3:5:394>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<PROD:My_Tom_Hao_Hao>>>
+<<<STATS:4:5:394>>>
+<<<IMG:recv_hao_hao.jpg>>>
+huy bid: 6
+<<<BID:5>>>
+quan bid: 5
+You earned 1264 pts (Price: 5, Accuracy: 1000, Time Bonus: 264)
+Price: 5. Winner: quan (+1264 pts)!
+--- ROUND 4 RESULTS ---
+quan: Bid 5 | +1264 pts (Acc: 1000, Time: 264)
+huy: Bid 6 | Overbid!
+
+LEADERBOARD:
+quan: 1658
+huy: 946
+
+<<<STATS:4:5:1658>>>
+Round 5/5: Giay_Nike_Jordan
+<<<PROD:Giay_Nike_Jordan>>>
+<<<STATS:5:5:1658>>>
+<<<IMG:recv_jordan.png>>>
+huy bid: 5435
+<<<BID:6356>>>
+quan bid: 6356
+You overbid! (Price: 5000)
+Price: 5000. No winners (all overbid).
+--- ROUND 5 RESULTS ---
+quan: Bid 6356 | Overbid!
+huy: Bid 5435 | Overbid!
+
+LEADERBOARD:
+quan: 1658
+huy: 946
+
+<<<STATS:5:5:1658>>>
+--- FINAL RESULTS ---
+quan: 1658 pts
+huy: 946 pts
+WINNER: quan!
+--- End Log ---

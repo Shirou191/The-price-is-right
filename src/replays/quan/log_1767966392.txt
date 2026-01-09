@@ -1,0 +1,98 @@
+--- Start Log ---
+Room 1 Created (You are Owner)
+huy joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+huy bid: 5254
+<<<BID:5365>>>
+quan bid: 5365
+You earned 419 pts (Price: 30000, Accuracy: 178, Time Bonus: 240)
+huy earned 422 pts (Accuracy: 175, Time Bonus: 246)
+--- ROUND 1 RESULTS ---
+quan: Bid 5365 | +419 pts (Acc: 178, Time: 240)
+huy: Bid 5254 | +422 pts (Acc: 175, Time: 246)
+
+Price: 30000. Winner: huy (+422 pts)!
+LEADERBOARD:
+quan: 419
+huy: 422
+
+<<<STATS:1:5:419>>>
+Round 2/5: Honda_Vision_2024
+<<<STATS:2:5:419>>>
+<<<IMG:recv_vision.jpg>>>
+huy bid: 5476
+<<<BID:6543>>>
+quan bid: 6543
+You earned 451 pts (Price: 32000, Accuracy: 204, Time Bonus: 247)
+huy earned 424 pts (Accuracy: 171, Time Bonus: 253)
+--- ROUND 2 RESULTS ---
+quan: Bid 6543 | +451 pts (Acc: 204, Time: 247)
+huy: Bid 5476 | +424 pts (Acc: 171, Time: 253)
+
+Price: 32000. Winner: quan (+451 pts)!
+LEADERBOARD:
+quan: 870
+huy: 846
+
+<<<STATS:2:5:870>>>
+Round 3/5: Laptop_Dell_XPS
+<<<STATS:3:5:870>>>
+<<<IMG:recv_dell.jpg>>>
+huy bid: 54254
+<<<BID:65365>>>
+quan bid: 65365
+You overbid! (Price: 45000)
+--- ROUND 3 RESULTS ---
+quan: Bid 65365 | Overbid!
+huy: Bid 54254 | Overbid!
+
+Price: 45000. No winners (all overbid).
+LEADERBOARD:
+quan: 870
+huy: 846
+
+<<<STATS:3:5:870>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<STATS:4:5:870>>>
+<<<IMG:recv_hao_hao.jpg>>>
+huy bid: 4
+<<<BID:5>>>
+quan bid: 5
+You earned 1262 pts (Price: 5, Accuracy: 1000, Time Bonus: 262)
+huy earned 1069 pts (Accuracy: 800, Time Bonus: 269)
+--- ROUND 4 RESULTS ---
+quan: Bid 5 | +1262 pts (Acc: 1000, Time: 262)
+huy: Bid 4 | +1069 pts (Acc: 800, Time: 269)
+
+Price: 5. Winner: quan (+1262 pts)!
+LEADERBOARD:
+quan: 2132
+huy: 1915
+
+<<<STATS:4:5:2132>>>
+Round 5/5: Giay_Nike_Jordan
+<<<STATS:5:5:2132>>>
+<<<IMG:recv_jordan.png>>>
+huy bid: 6435
+<<<BID:4556>>>
+quan bid: 4556
+You earned 1155 pts (Price: 5000, Accuracy: 911, Time Bonus: 244)
+--- ROUND 5 RESULTS ---
+quan: Bid 4556 | +1155 pts (Acc: 911, Time: 244)
+huy: Bid 6435 | Overbid!
+
+Price: 5000. Winner: quan (+1155 pts)!
+LEADERBOARD:
+quan: 3287
+huy: 1915
+
+<<<STATS:5:5:3287>>>
+--- FINAL RESULTS ---
+quan: 3287 pts
+huy: 1915 pts
+
+WINNER: quan!
+--- End Log ---

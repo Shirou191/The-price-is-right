@@ -1,0 +1,104 @@
+--- Start Log ---
+Room 1 Created (You are Owner)
+huy joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<PROD:Iphone_15_Pro_Max>>>
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+huy bid: 5435
+<<<BID:6534>>>
+quan bid: 6534
+You earned 433 pts (Price: 30000, Accuracy: 217, Time Bonus: 215)
+huy earned 403 pts (Accuracy: 181, Time Bonus: 222)
+Price: 30000. Winner: quan (+433 pts)!
+--- ROUND 1 RESULTS ---
+quan: Bid 6534 | +433 pts (Acc: 217, Time: 215)
+huy: Bid 5435 | +403 pts (Acc: 181, Time: 222)
+
+LEADERBOARD:
+quan: 433
+huy: 403
+
+<<<STATS:1:5:433>>>
+Round 2/5: Honda_Vision_2024
+<<<PROD:Honda_Vision_2024>>>
+<<<STATS:2:5:433>>>
+<<<IMG:recv_vision.jpg>>>
+huy bid: 6535
+<<<BID:6535>>>
+quan bid: 6535
+You earned 422 pts (Price: 32000, Accuracy: 204, Time Bonus: 218)
+huy earned 429 pts (Accuracy: 204, Time Bonus: 225)
+Price: 32000. Winner: huy (+429 pts)!
+--- ROUND 2 RESULTS ---
+quan: Bid 6535 | +422 pts (Acc: 204, Time: 218)
+huy: Bid 6535 | +429 pts (Acc: 204, Time: 225)
+
+LEADERBOARD:
+quan: 855
+huy: 832
+
+<<<STATS:2:5:855>>>
+Round 3/5: Laptop_Dell_XPS
+<<<PROD:Laptop_Dell_XPS>>>
+<<<STATS:3:5:855>>>
+<<<IMG:recv_dell.jpg>>>
+huy bid: 7647
+<<<BID:6534>>>
+quan bid: 6534
+You earned 379 pts (Price: 45000, Accuracy: 145, Time Bonus: 234)
+huy earned 410 pts (Accuracy: 169, Time Bonus: 240)
+Price: 45000. Winner: huy (+410 pts)!
+--- ROUND 3 RESULTS ---
+quan: Bid 6534 | +379 pts (Acc: 145, Time: 234)
+huy: Bid 7647 | +410 pts (Acc: 169, Time: 240)
+
+LEADERBOARD:
+quan: 1234
+huy: 1242
+
+<<<STATS:3:5:1234>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<PROD:My_Tom_Hao_Hao>>>
+<<<STATS:4:5:1234>>>
+<<<IMG:recv_hao_hao.jpg>>>
+huy bid: 4
+<<<BID:5>>>
+quan bid: 5
+You earned 1251 pts (Price: 5, Accuracy: 1000, Time Bonus: 251)
+huy earned 1058 pts (Accuracy: 800, Time Bonus: 258)
+Price: 5. Winner: quan (+1251 pts)!
+--- ROUND 4 RESULTS ---
+quan: Bid 5 | +1251 pts (Acc: 1000, Time: 251)
+huy: Bid 4 | +1058 pts (Acc: 800, Time: 258)
+
+LEADERBOARD:
+quan: 2485
+huy: 2300
+
+<<<STATS:4:5:2485>>>
+Round 5/5: Giay_Nike_Jordan
+<<<PROD:Giay_Nike_Jordan>>>
+<<<STATS:5:5:2485>>>
+<<<IMG:recv_jordan.png>>>
+huy bid: 6536
+<<<BID:5435>>>
+quan bid: 5435
+You overbid! (Price: 5000)
+Price: 5000. No winners (all overbid).
+--- ROUND 5 RESULTS ---
+quan: Bid 5435 | Overbid!
+huy: Bid 6536 | Overbid!
+
+LEADERBOARD:
+quan: 2485
+huy: 2300
+
+<<<STATS:5:5:2485>>>
+--- FINAL RESULTS ---
+quan: 2485 pts
+huy: 2300 pts
+
+WINNER: quan!
+--- End Log ---

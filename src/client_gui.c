@@ -387,6 +387,11 @@ gboolean on_socket_data(GIOChannel *source, GIOCondition condition, gpointer dat
     else if (type == PT_GAME_QUESTION) {
         gtk_label_set_text(GTK_LABEL(lbl_product_name), buf);
         gtk_entry_set_text(GTK_ENTRY(entry_bid), "");
+        
+        if(replay_log) {
+            fprintf(replay_log, "<<<PROD:%s>>>\n", buf);
+            fflush(replay_log);
+        }
     }
     else if (type == PT_IMAGE_START) {
         char *fname = strtok(buf, ":");
@@ -519,6 +524,14 @@ gboolean replay_step(gpointer data) {
             char *val = line + 7;
             gtk_entry_set_text(GTK_ENTRY(entry_bid), val);
         }
+    } else if (strncmp(line, "<<<PROD:", 8) == 0) {
+        // Format: <<<PROD:desc>>>
+        char *end = strchr(line, '>');
+        if(end) {
+             *end = 0;
+             char *desc = line + 8;
+             gtk_label_set_text(GTK_LABEL(lbl_product_name), desc);
+        }
     } else if (strncmp(line, "<<<STATS:", 9) == 0) {
         // Format: <<<STATS:r:m:s>>>
         char *end = strchr(line, '>');
@@ -534,34 +547,71 @@ gboolean replay_step(gpointer data) {
             gtk_label_set_text(GTK_LABEL(lbl_score), sc);
         }
     } else {
-        // --- Multiline Popups ---
-        if (strncmp(line, "LEADERBOARD:", 12) == 0 || strncmp(line, "--- FINAL RESULTS ---", 21) == 0) {
-            // Aggregate following lines until empty or start with <<<
-            GString *msg = g_string_new(line);
+
+        // 1. Filter Start/End Logs FIRST (User Request: "delete end log pop up")
+        if(strncmp(line, "--- Starting Replay", 19) == 0 || strncmp(line, "--- End Log", 11) == 0) {
+            // Do nothing (Skip log and toast)
+        }
+        // 2. Multiline Popups (Leaderboard OR Round Summary OR Final Results)
+        // User requested "Price..." included in popup. Server sends "Price:..." line BEFORE "--- ROUND...".
+        // So we trigger on "Price:" (or "LEADERBOARD", etc.)
+        else if (strncmp(line, "LEADERBOARD:", 12) == 0 || strncmp(line, "--- ", 4) == 0 || strncmp(line, "Price:", 6) == 0) {
+            
+            // If "Price:" starts the block, we want to capture it + subsequent lines.
+            
+            GString *msg = g_string_new("");
+            g_string_append(msg, line);
             g_string_append_c(msg, '\n');
             
             while(replay_lines->next) {
                 char *next_line = (char*)replay_lines->next->data;
-                // Stop if internal tag or another header (simplified)
+                
+                // Stop if internal tag. 
+                // Note: "Price:" line is followed by "--- ROUND..." line. We must NOT stop on "--- ".
+                // Only stop on "<<<" or empty.
                 if (strncmp(next_line, "<<<", 3) == 0 || strlen(next_line) == 0) break;
                 
-                g_string_append(msg, next_line);
+                // Personalize: "Username:" -> "You:"
+                char name_prefix[70];
+                snprintf(name_prefix, sizeof(name_prefix), "%s:", my_username);
+                
+                if (strncmp(next_line, name_prefix, strlen(name_prefix)) == 0) {
+                    g_string_append(msg, "You"); 
+                    g_string_append(msg, next_line + strlen(my_username)); 
+                } else if (strstr(next_line, "Winner:") && strstr(next_line, my_username)) {
+                     // Replace "Winner: Name" with "Winner: You" ??
+                     // Let's replace "Winner: Name" with "Winner: You" in the Price/Winner line
+                     // "Price: 100. Winner: Name (+10 pts)!"
+                     // Logic: find winner name, replace. Or simple str-replace of name.
+                     // A bit complex for strstr safely. But we can substitute.
+                     char *p = strstr(next_line, my_username);
+                     if(p) {
+                         // Found name.
+                         // Append prefix "Price: ... Winner: "
+                         g_string_append_len(msg, next_line, p - next_line);
+                         g_string_append(msg, "You");
+                         g_string_append(msg, p + strlen(my_username));
+                     } else {
+                         g_string_append(msg, next_line);
+                     }
+                } else {
+                    g_string_append(msg, next_line);
+                }
                 g_string_append_c(msg, '\n');
                 
-                // Advance line and free current
+                // Advance
                 g_free(line); 
-                replay_lines = g_list_delete_link(replay_lines, replay_lines); // Move head
-                line = (char*)replay_lines->data; // Look at next
+                replay_lines = g_list_delete_link(replay_lines, replay_lines); 
+                line = (char*)replay_lines->data; 
             }
             show_toast(msg->str);
             append_log(msg->str);
             g_string_free(msg, TRUE);
-            
-            // "line" now points to last processed line, which loop will free at end
         }
         else if(strstr(line, "You earned") || strstr(line, "You overbid!") || strstr(line, "Price:") || strstr(line, "WINNER:")) {
-            show_toast(line);
-            append_log(line);
+           // Suppress specific single-line toasts in replay (User Request)
+           // But still log to text view?
+           append_log(line); 
         } else {
             append_log(line);
         }

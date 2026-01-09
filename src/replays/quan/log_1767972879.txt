@@ -1,0 +1,101 @@
+--- Start Log ---
+quan joined Room 1
+Owner started the game!
+Round 1/5: Iphone_15_Pro_Max
+<<<PROD:Iphone_15_Pro_Max>>>
+<<<STATS:1:5:0>>>
+<<<IMG:recv_iphone.jpg>>>
+<<<BID:32244>>>
+quan bid: 32244
+huy bid: 54354
+You overbid! (Price: 30000)
+Price: 30000. No winners (all overbid).
+--- ROUND 1 RESULTS ---
+quan: Bid 32244 | Overbid!
+huy: Bid 54354 | Overbid!
+
+LEADERBOARD:
+quan: 0
+huy: 0
+
+<<<STATS:1:5:0>>>
+Round 2/5: Honda_Vision_2024
+<<<PROD:Honda_Vision_2024>>>
+<<<STATS:2:5:0>>>
+<<<IMG:recv_vision.jpg>>>
+<<<BID:43244>>>
+quan bid: 43244
+huy bid: 5433
+You overbid! (Price: 32000)
+huy earned 361 pts (Accuracy: 169, Time Bonus: 192)
+Price: 32000. Winner: huy (+361 pts)!
+--- ROUND 2 RESULTS ---
+quan: Bid 43244 | Overbid!
+huy: Bid 5433 | +361 pts (Acc: 169, Time: 192)
+
+LEADERBOARD:
+quan: 0
+huy: 361
+
+<<<STATS:2:5:0>>>
+Round 3/5: Laptop_Dell_XPS
+<<<PROD:Laptop_Dell_XPS>>>
+<<<STATS:3:5:0>>>
+<<<IMG:recv_dell.jpg>>>
+<<<BID:5435>>>
+quan bid: 5435
+huy bid: 35436
+You earned 374 pts (Price: 45000, Accuracy: 120, Time Bonus: 253)
+huy earned 1033 pts (Accuracy: 787, Time Bonus: 246)
+Price: 45000. Winner: huy (+1033 pts)!
+--- ROUND 3 RESULTS ---
+quan: Bid 5435 | +374 pts (Acc: 120, Time: 253)
+huy: Bid 35436 | +1033 pts (Acc: 787, Time: 246)
+
+LEADERBOARD:
+quan: 374
+huy: 1394
+
+<<<STATS:3:5:374>>>
+Round 4/5: My_Tom_Hao_Hao
+<<<PROD:My_Tom_Hao_Hao>>>
+<<<STATS:4:5:374>>>
+<<<IMG:recv_hao_hao.jpg>>>
+<<<BID:4>>>
+quan bid: 4
+huy bid: 5
+You earned 1058 pts (Price: 5, Accuracy: 800, Time Bonus: 258)
+huy earned 1252 pts (Accuracy: 1000, Time Bonus: 252)
+Price: 5. Winner: huy (+1252 pts)!
+--- ROUND 4 RESULTS ---
+quan: Bid 4 | +1058 pts (Acc: 800, Time: 258)
+huy: Bid 5 | +1252 pts (Acc: 1000, Time: 252)
+
+LEADERBOARD:
+quan: 1432
+huy: 2646
+
+<<<STATS:4:5:1432>>>
+Round 5/5: Giay_Nike_Jordan
+<<<PROD:Giay_Nike_Jordan>>>
+<<<STATS:5:5:1432>>>
+<<<IMG:recv_jordan.png>>>
+<<<BID:6535>>>
+quan bid: 6535
+huy bid: 5435
+You overbid! (Price: 5000)
+Price: 5000. No winners (all overbid).
+--- ROUND 5 RESULTS ---
+quan: Bid 6535 | Overbid!
+huy: Bid 5435 | Overbid!
+
+LEADERBOARD:
+quan: 1432
+huy: 2646
+
+<<<STATS:5:5:1432>>>
+--- FINAL RESULTS ---
+quan: 1432 pts
+huy: 2646 pts
+
+WINNER: huy!
